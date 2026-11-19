@@ -1,0 +1,14 @@
+[package]
+name = "settlework-escrow"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[lib]
+crate-type = ["cdylib", "lib"]
+
+[dependencies]
+soroban-sdk = "29"
+
+[dev-dependencies]
+soroban-sdk = { version = "29", features = ["testutils"] }

@@ -1,0 +1,14 @@
+/target
+contracts/escrow/target
+**/*.rs.bk
+Cargo.lock.backup
+
+# Node / Web
+node_modules/
+dist/
+.env
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db

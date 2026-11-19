@@ -1,0 +1,82 @@
+---
+name: agent-browser-webauthn
+description: Use agent-browser with Chrome DevTools Protocol virtual WebAuthn authenticators to test passkey, WebAuthn, Stellar smart account, wallet creation, wallet restore, and browser signing flows. Trigger when a browser test must run a passkey or WebAuthn ceremony, or when a task asks for virtual authenticators, Stellar Smart Account Kit browser tests, or agent-browser passkey automation. Do not use for browser flows without a passkey or WebAuthn ceremony—password logins and extension-wallet connects route to agent-browser alone. Do not use to write or review passkey or WebAuthn code when no browser run is requested.
+---
+
+# Agent Browser WebAuthn
+
+Use this with `$agent-browser` when a browser test must create or authenticate a passkey. The bundled helper keeps one Chrome CDP WebAuthn virtual authenticator attached while one child command drives the whole UI flow.
+
+## Workflow
+
+1. Start a fresh `agent-browser` session for each full E2E.
+2. Open the target page before attaching WebAuthn, so the helper can bind to the correct page target.
+3. Set `WEBAUTHN_SKILL_DIR` to the absolute path of this skill's directory, the one that contains this `SKILL.md`.
+4. Wrap the entire create -> restore -> connect -> reject -> sign driver in one helper invocation. Cleanup removes the authenticator and its credentials when the child exits, so never split ceremonies across helper runs.
+
+```bash
+WEBAUTHN_SKILL_DIR="/path/to/agent-browser-webauthn"
+SESSION="passkey-e2e-$(date +%s)"
+ARTIFACT_DIR="$(mktemp -d)"
+export SESSION WEBAUTHN_EVENTS_FILE="$ARTIFACT_DIR/webauthn.jsonl"
+export WEBAUTHN_CONTROL_FILE="$ARTIFACT_DIR/webauthn-control.txt"
+: >"$WEBAUTHN_CONTROL_FILE"
+
+# Start headed first. Once this passes, omit --headed for the headless canary.
+agent-browser --session "$SESSION" --headed open http://localhost:3000
+
+node "$WEBAUTHN_SKILL_DIR/scripts/agent-browser-webauthn-helper.mjs" run \
+  --session "$SESSION" --require-credential true --timeout-ms 300000 -- bash -c '
+    set -euo pipefail
+    ab() { agent-browser --session "$SESSION" "$@"; }
+
+    ab find role button click --name "Create passkey" --exact
+    ab wait --text "Connected"
+    ab reload
+    ab find role button click --name "Restore session" --exact
+    ab wait --text "Restored"
+    ab find role button click --name "Connect passkey" --exact
+    ab wait --text "Connected"
+
+    printf "uv:false\n" >"$WEBAUTHN_CONTROL_FILE"
+    until grep -q "\"controlApplied\":\"uv:false\"" "$WEBAUTHN_EVENTS_FILE"; do sleep 0.2; done
+    ab find role button click --name "Connect passkey" --exact
+    ab wait --text "rejected"
+    printf "uv:true\n" >"$WEBAUTHN_CONTROL_FILE"
+    until grep -q "\"controlApplied\":\"uv:true\"" "$WEBAUTHN_EVENTS_FILE"; do sleep 0.2; done
+    ab find role button click --name "Sign" --exact
+    ab wait --text "Signed"
+  '
+
+grep -q '"event":"WebAuthn.credentialAdded"' "$WEBAUTHN_EVENTS_FILE"
+grep -q '"event":"WebAuthn.credentialAsserted"' "$WEBAUTHN_EVENTS_FILE"
+agent-browser --session "$SESSION" close
+```
+
+5. Adapt only the app URL, button names, and result text. Keep ceremony triggers as native `agent-browser click` or `find ... click` commands. Never use evaluated DOM `.click()`. Keep `--exact` on each `find role ... --name` click. Without it, the name match is a case-insensitive substring, so `"Sign"` also matches `"Design"` and `"Sign out"`. The command then clicks one match and reports no error.
+6. Assert real app output after each operation. For Stellar Smart Account Kit, assert a `C...` contract id or an explicit transaction/funding error. Do not treat a visible button click as success.
+7. Require both credential events and inspect the final `WebAuthn.getCredentials` diagnostic. Always pass `--require-credential true` for credential flows. Without it, the helper only warns and exits 0 when no virtual credential was observed.
+8. Close the fresh session after smoke tests so virtual authenticators and IndexedDB state do not leak across runs.
+
+## Important Details
+
+- A reload keeps the same target. If a tab or page target is replaced, stop and run the whole flow again from a fresh session, with the helper attached to the new target before the first credential. Pass `--pin-tab` on `open` to make commands fail with `tab_gone` when the bound tab closes, instead of driving a different tab.
+- The helper uses `WebAuthn.enable({enableUI:false})` and a CTAP2 internal authenticator with resident keys, user verification, and automatic presence. Run the helper with `help` to see the flags that override these defaults.
+- Setup diagnostics include the target id and authenticator id. Credential events and redacted `WebAuthn.getCredentials` output go to stderr or `WEBAUTHN_EVENTS_FILE` as JSONL; private key material is never logged.
+- Use `WEBAUTHN_CONTROL_FILE` to test rejection. Write `uv:false` before the rejected ceremony and `uv:true` before the next successful ceremony. Before the next click, wait for the matching `controlApplied` event in `WEBAUTHN_EVENTS_FILE`. The helper reads the file on a 500 ms poll, so elapsed time does not prove that a directive applied.
+- Setup, CDP calls, and the wrapped command have a 120-second timeout by default. Set `--timeout-ms` to a larger positive value for deliberately long flows.
+- Use a local or otherwise trusted CDP endpoint. Remote CDP URLs are rejected unless `--allow-remote-cdp true` is passed deliberately.
+- Launch the site on `localhost` or HTTPS. WebAuthn requires a secure context; many passkey and smart-account SDKs also reject raw `127.0.0.1` for domain validation.
+- Do not pass `--profile`, `--state`, or `--restore`. Unset `AGENT_BROWSER_RESTORE`, `AGENT_BROWSER_STATE`, and `AGENT_BROWSER_PROFILE`. These load old cookies, storage, or passkey state, so a pass no longer proves a fresh ceremony. If a session has stale passkey or IndexedDB state, close it. Do not try to repair it in place.
+- Do not put secrets in command arguments or page text assertions.
+
+## Requirements
+
+- `agent-browser` CLI.
+- `$agent-browser` skill is recommended for current CLI workflow guidance but is not bundled automatically.
+- Node.js 22 or newer, for the built-in `WebSocket` client used by the helper.
+
+## Script
+
+- `scripts/agent-browser-webauthn-helper.mjs` - wrap any command while a virtual authenticator is attached to the session.
+- `scripts/agent-browser-webauthn-helper.test.mjs` - dependency-free CLI safety checks. After you change the helper, run `node "$WEBAUTHN_SKILL_DIR/scripts/agent-browser-webauthn-helper.test.mjs"`. The checks do not start a browser. Prove a helper change with one live run of the workflow recipe against a local passkey page.

@@ -1,0 +1,243 @@
+{
+  "skill_name": "solo-troubleshoot",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "pnpm works in my terminal but Solo says command not found. Diagnose it and fix the affected command only.",
+      "expected_output": "Confirm profile and working directory, inspect rendered startup output, verify login-shell PATH/version-manager setup, refresh shell environment if authorized, restart only exact authorized process, and verify result.",
+      "assertions": [
+        "Checks trust, working_dir, profile, and captured shell environment before editing",
+        "Uses rendered output first and identifies login-shell/version-manager cause",
+        "Repairs and restarts only exact authorized target",
+        "Leaves Git, publishing, and integration to root/operator"
+      ],
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Solo feels broken today. Can you take a look?",
+      "expected_output": "Clarify or infer scope safely, gather read-only project/process evidence, classify likely control-plane versus runtime issue, and stop after diagnosis unless repair is explicitly authorized.",
+      "assertions": [
+        "Uses whoami and scoped status before broad logs",
+        "Runs solo doctor only when CLI/control-plane evidence warrants it",
+        "Separates confirmed cause from hypothesis",
+        "Does not reset, delete, restart all, or clear output"
+      ],
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Set up this repository in Solo with a shared Web command and commit the config.",
+      "expected_output": "Route configuration to solo-set-up-projects and leave commit/integration to root/operator; do not perform troubleshooting or runtime mutation.",
+      "assertions": [
+        "Recognizes neighboring project-setup request",
+        "Does not diagnose nonexistent failure",
+        "Does not start or restart processes",
+        "Does not commit, stage, push, publish, or integrate"
+      ],
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "My dev server never turns green in Solo and the port looks dead. what's up?",
+      "expected_output": "Use $solo-troubleshoot to diagnose the readiness and port failure: confirm scope, inspect rendered startup output and bound-port evidence, separate listener readiness from application health, and stop at root cause unless repair is authorized.",
+      "assertions": [
+        "Treats never-ready plus dead port as a diagnosis, not a status view",
+        "Inspects rendered output and bound-port evidence before concluding",
+        "Separates listener readiness from application health",
+        "Does not restart or reconfigure without authorization"
+      ],
+      "files": []
+    },
+    {
+      "id": 5,
+      "prompt": "$solo-troubleshoot the restart loop on my worker command.",
+      "expected_output": "Use $solo-troubleshoot to find the restart-loop root cause: read rendered crash output, check restart policy and exit cause, distinguish config, trust, and shell from application error, and repair only the exact authorized target.",
+      "assertions": [
+        "Reads captured crash output before changing anything",
+        "Identifies restart-loop cause across config, trust, shell, and application error",
+        "Repairs and restarts only the exact authorized process",
+        "Does not restart all or clear output"
+      ],
+      "files": []
+    },
+    {
+      "id": 6,
+      "prompt": "The frontend command keeps crashing right after start and I need the API logs too — work out why it dies.",
+      "expected_output": "Use $solo-troubleshoot to diagnose the frontend crash — read its rendered output, isolate configuration, trust, working-directory, and shell causes — and pull the API output only as supporting evidence, without runtime mutation unless authorized.",
+      "assertions": [
+        "Focuses on crash root cause and uses API output as evidence only",
+        "Checks working_dir, profile, trust, and shell environment",
+        "Does not treat the request as a routine log view",
+        "Does not restart or reconfigure without authorization"
+      ],
+      "files": []
+    },
+    {
+      "id": 7,
+      "prompt": "I edited solo.yml but Solo keeps running the old command. Why isn't my change taking?",
+      "expected_output": "Use $solo-troubleshoot to diagnose the solo.yml sync failure: compare on-disk YAML against the rendered command, check sync/reload and command-storage state, and identify why the change is not applied before any fix.",
+      "assertions": [
+        "Compares on-disk solo.yml with the rendered/effective command",
+        "Checks YAML sync and command-storage state",
+        "Diagnoses stale-config cause before mutating",
+        "Does not author new config or restart without authorization"
+      ],
+      "files": []
+    },
+    {
+      "id": 8,
+      "prompt": "Solo refuses to run my command and the trust prompt keeps coming back. Can you sort out why?",
+      "expected_output": "Use $solo-troubleshoot to diagnose the trust failure: inspect trust state and scope, determine why trust is not persisting, and separate the trust gate from any downstream command error before acting.",
+      "assertions": [
+        "Inspects trust state and scope as the primary cause",
+        "Explains why trust is not persisting",
+        "Separates the trust gate from downstream command failure",
+        "Does not blanket-approve or bypass trust without authorization"
+      ],
+      "files": []
+    },
+    {
+      "id": 9,
+      "prompt": "Solo shows my process as running but the terminal is empty and nothing is listening. Something's off.",
+      "expected_output": "Use $solo-troubleshoot to reconcile the disagreeing status: gather read-only process and output evidence, determine whether status is stale or the process truly exited, and classify the runtime versus control-plane cause before repair.",
+      "assertions": [
+        "Reconciles reported status against actual output and listeners",
+        "Determines whether status is stale versus process exited",
+        "Classifies control-plane versus runtime cause",
+        "Does not reset or restart before diagnosis"
+      ],
+      "files": []
+    },
+    {
+      "id": 10,
+      "prompt": "My command runs from the wrong folder in Solo and can't find package.json. Figure out what's misconfigured.",
+      "expected_output": "Use $solo-troubleshoot to diagnose the working-directory and execution-profile failure: verify configured working_dir and profile against the rendered command, identify the mismatch causing the missing file, and stop at root cause unless repair is authorized.",
+      "assertions": [
+        "Verifies working_dir and execution profile against the rendered command",
+        "Identifies the path mismatch as root cause",
+        "Does not re-author project configuration",
+        "Does not restart without authorization"
+      ],
+      "files": []
+    },
+    {
+      "id": 11,
+      "prompt": "Is my dev server ready yet? Just want to check its status.",
+      "expected_output": "Do not use $solo-troubleshoot; route to $solo-observe-services for read-only readiness and status inspection, since nothing is failing.",
+      "assertions": [
+        "Recognizes a healthy-state readiness check, not a failure",
+        "Routes to solo-observe-services",
+        "Does not diagnose a nonexistent problem",
+        "Does not change runtime"
+      ],
+      "files": []
+    },
+    {
+      "id": 12,
+      "prompt": "Show me the last 50 lines of the API terminal. Everything's fine, I just want to read the output.",
+      "expected_output": "Do not use $solo-troubleshoot; route to $solo-observe-services for read-only log and output viewing when no failure is reported.",
+      "assertions": [
+        "Recognizes a routine output view",
+        "Routes to solo-observe-services",
+        "Does not open a diagnosis",
+        "Does not mutate runtime or config"
+      ],
+      "files": []
+    },
+    {
+      "id": 13,
+      "prompt": "What ports and localhost URLs is my app bound to right now?",
+      "expected_output": "Do not use $solo-troubleshoot; route to $solo-observe-services to inspect bound ports and URLs, since this is healthy-state inspection.",
+      "assertions": [
+        "Recognizes a bound-port and URL inspection, not a port failure",
+        "Routes to solo-observe-services",
+        "Does not diagnose",
+        "Does not change runtime"
+      ],
+      "files": []
+    },
+    {
+      "id": 14,
+      "prompt": "Add a lint command to this repo's solo.yml so it runs on save.",
+      "expected_output": "Do not use $solo-troubleshoot; route to $solo-set-up-projects for authoring solo.yml commands and restart policy, since nothing is failing.",
+      "assertions": [
+        "Recognizes initial config authoring, not diagnosis",
+        "Routes to solo-set-up-projects",
+        "Does not troubleshoot a nonexistent failure",
+        "Does not start or restart processes"
+      ],
+      "files": []
+    },
+    {
+      "id": 15,
+      "prompt": "Check whether my Claude agent is set up and launchable in Solo.",
+      "expected_output": "Do not use $solo-troubleshoot; route to $solo-work-with-agents for agent setup and launchability health checks.",
+      "assertions": [
+        "Recognizes an agent-tool health check",
+        "Routes to solo-work-with-agents",
+        "Does not diagnose project, command, or service failure",
+        "Does not change runtime"
+      ],
+      "files": []
+    },
+    {
+      "id": 16,
+      "prompt": "Is my codex agent tool configured correctly and healthy?",
+      "expected_output": "Do not use $solo-troubleshoot; route to $solo-work-with-agents for agent configuration and health verification.",
+      "assertions": [
+        "Recognizes an agent configuration and health check",
+        "Routes to solo-work-with-agents",
+        "Does not treat it as a Solo control-plane or runtime failure",
+        "Does not mutate runtime"
+      ],
+      "files": []
+    },
+    {
+      "id": 17,
+      "prompt": "Restart my dev server.",
+      "expected_output": "Do not use $solo-troubleshoot; route to $solo-run-processes for authorized routine restart, since no failure needs diagnosis.",
+      "assertions": [
+        "Recognizes an authorized routine restart",
+        "Routes to solo-run-processes",
+        "Does not open a diagnosis",
+        "Does not investigate a nonexistent failure"
+      ],
+      "files": []
+    },
+    {
+      "id": 18,
+      "prompt": "Start all the commands for this project.",
+      "expected_output": "Do not use $solo-troubleshoot; route to $solo-run-processes for routine bulk start, since nothing is being diagnosed.",
+      "assertions": [
+        "Recognizes a routine bulk start",
+        "Routes to solo-run-processes",
+        "Does not diagnose",
+        "Does not classify a failure"
+      ],
+      "files": []
+    },
+    {
+      "id": 19,
+      "prompt": "Solo's window went blank but my commands still seem to be running. How do I get the UI back without killing anything?",
+      "expected_output": "Use $solo-troubleshoot. Confirm through MCP or the CLI that processes still run, then recommend the command palette Refresh frontend action, which reloads the interface without stopping processes. Do not reset state, delete projects, or restart processes.",
+      "assertions": [
+        "Verifies process state outside the UI first",
+        "Recommends Refresh frontend as the cheapest repair",
+        "Does not reset app data, delete state, or restart processes"
+      ],
+      "files": []
+    },
+    {
+      "id": 20,
+      "prompt": "My Express server crashes with EADDRINUSE when I run npm start in a plain terminal. Solo is not involved.",
+      "expected_output": "Do not use $solo-troubleshoot; the failure happens outside Solo. Diagnose it as an ordinary port conflict.",
+      "assertions": [
+        "Recognizes a failure outside Solo",
+        "Does not call Solo diagnostic tools or solo doctor",
+        "Diagnoses the port conflict directly"
+      ],
+      "files": []
+    }
+  ]
+}
